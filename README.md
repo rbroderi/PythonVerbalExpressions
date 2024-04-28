@@ -68,8 +68,7 @@ print(result_re)
 
 ## Developer setup : running the tests
 ```bash
-python setup.py develop
-python setup.py test
+just tests
 ```
 ## Other implementations
 You can view all implementations on [VerbalExpressions.github.io](http://VerbalExpressions.github.io)
