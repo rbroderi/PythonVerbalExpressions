@@ -2,8 +2,8 @@ Verbex: Python verbal based regular expressions
 ================================================
 
 <!-- ![Build Status](https://github.com/rbroderi/Verbex/actions/workflows/main.yml/badge.svg?event=push) -->
-[![Generic badge](https://img.shields.io/badge/license-GPL‐3.0-orange.svg)](https://github.com/rbroderi/Verbex/blob/master/LICENSE)
 <!-- [![GitHub License](https://img.shields.io/github/license/rbroderi/Verbex)](https://github.com/rbroderi/Verbex/blob/master/LICENSE) -->
+[![Generic badge](https://img.shields.io/badge/license-GPL‐3.0-orange.svg)](https://github.com/rbroderi/Verbex/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/verbex)](https://pypi.python.org/pypi/ansicolortags/)
 [![Generic badge](https://img.shields.io/badge/mypy-typed-purple.svg)](http://mypy-lang.org/)
