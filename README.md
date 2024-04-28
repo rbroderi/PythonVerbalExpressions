@@ -8,7 +8,7 @@ Verbex: Python verbal based regular expressions
 [![Generic badge](https://img.shields.io/badge/mypy-typed-purple.svg)](http://mypy-lang.org/)
 [![Generic badge](https://img.shields.io/badge/beartype-runtime_typed-cyan.svg)](https://github.com/beartype/beartype)
 [![Generic badge](https://img.shields.io/badge/bandit-checked-magenta.svg)](https://bandit.readthedocs.io/en/latest/)
-![Static Badge](https://img.shields.io/badge/:badgeContent)
+[![Generic badge](https://img.shields.io/badge/uv-requirements-yellow.svg)](https://shields.io/)
 ![Dynamic TOML Badge](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Frbroderi%2FVerbex%2Fmaster%2Fpyproject.toml&query=%24.project.version&label=Version)
 
 
