@@ -19,15 +19,9 @@ try:
 except ImportError:
     from typing_extensions import Self
 
-try:
-    from typing import ParamSpec
-    from typing import Protocol
-
-except ImportError:
-    from typing_extensions import ParamSpec
-    from typing_extensions import Protocol
-
 from re import Pattern
+from typing import ParamSpec
+from typing import Protocol
 from typing import TypeVar
 
 from beartype import beartype
@@ -184,7 +178,7 @@ EscapedCharClassOrSpecial: TypeAlias = str | CharClass | SpecialChar
 VerbexEscapedCharClassOrSpecial: TypeAlias = Union["Verbex", EscapedCharClassOrSpecial]
 
 
-class Verbex:
+class Verbex:  # pylint: disable=too-many-public-methods
     """VerbalExpressions class.
 
     The following methods do not try to match the original js lib!

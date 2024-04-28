@@ -1,6 +1,7 @@
 # pyright: reportPrivateUsage=false
 # flake8: noqa
 # type: ignore
+# pylint: disable-all
 import re
 import unittest
 
@@ -19,10 +20,10 @@ class verbexTest(unittest.TestCase):
     #     # self.exp = None
 
     def test_should_render_verbex_as_string(self):
-        self.assertEqual(str(Verbex()._add("^$")), "^$")  # noqa
+        self.assertEqual(str(Verbex()._add("^$")), "^$")
 
     def test_should_render_verbex_list_as_string(self):
-        self.assertEqual(str(Verbex()._add(["^", "[0-9]", "$"])), "^[0-9]$")  # noqa
+        self.assertEqual(str(Verbex()._add(["^", "[0-9]", "$"])), "^[0-9]$")
 
     def test_should_match_characters_in_range(self):
         regex = Verbex().letter_range("a", "c").regex()
@@ -45,14 +46,14 @@ class verbexTest(unittest.TestCase):
         regex = Verbex().anything().regex()
         self.assertIsNotNone(re.fullmatch(regex, "!@#$%¨&*()__+{}"))
 
-    def test_should_match_anything_but_specified_element_when_element_is_not_found(  # noqa: E501
+    def test_should_match_anything_but_specified_element_when_element_is_not_found(
         self,
     ):
         regex = Verbex().anything_but("X").find(" Files").regex()
         self.assertRegex("Y Files", regex)
         self.assertNotRegex("X Files", regex)
 
-    def test_should_not_match_anything_but_specified_element_when_specified_element_is_found(  # noqa: E501
+    def test_should_not_match_anything_but_specified_element_when_specified_element_is_found(
         self,
     ):
         regex = Verbex().anything_but("X").regex()

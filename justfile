@@ -1,5 +1,5 @@
 set ignore-comments
-PACKAGE_SLUG := "src/precommithooks"
+PACKAGE_SLUG := "src/verbex"
 export PYTHON_VERSION := if env("CI","false") != "false" { `python --version|cut -d" " -f2` } else { `cat .python-version` }
 PYTHON := if env("USE_SYSTEM_PYTHON", "false") != "false" { "python" } else { ".venv/bin/python" }
 PYTHON_ENV := if env("USE_SYSTEM_PYTHON", "false") != "false" { "" } else { "sh .venv/bin/activate &&" }
