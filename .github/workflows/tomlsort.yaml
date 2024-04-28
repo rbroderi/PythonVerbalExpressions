@@ -1,0 +1,27 @@
+name: TOML Formatting
+
+"on":
+  push:
+  pull_request:
+
+jobs:
+  tomlsort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: 'pip'
+
+      - uses: taiki-e/install-action@just
+
+      - name: Install Dependencies
+        run: just install
+
+      - name: Install toml-sort
+        run: pip install toml-sort
+
+      - name: Test Typing
+        run: just tomlsort_check

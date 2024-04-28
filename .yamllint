@@ -4,3 +4,6 @@ rules:
   document-start: disable
   new-lines: disable
   line-length: disable
+  truthy:
+    level: warning
+  indentation: disable

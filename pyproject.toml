@@ -1,36 +1,303 @@
 [build-system]
-requires = [ "setuptools >= 35.0.2", "wheel >= 0.29.0"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools>=67.0", "wheel"]
+
+[project]
+authors = [{ "name" = "R.Broderick" }]
+description = "Python verbal based regular expressions"
+version = "2.0.0"
+license = { "file" = "LICENSE" }
+name = "verbex"
+readme = { file = "README.md", content-type = "text/markdown" }
+dependencies = ["beartype", "typing-extensions; python_version < '3.12'"]
+requires-python = ">=3.10.0"
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "dapperdata",
+    "glom",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "pytest-pretty",
+    "ruamel.yaml",
+    "ruff",
+    "toml-sort",
+    "uv",
+    "validate-pyproject",
+    "packaging",
+    "snakeviz",
+    "pre-commit",
+    "tox",
+    "tox-pyenv-redux",
+    "pylint",
+    "perflint",
+    "snakeviz",
+    "pip-audit",
+]
+
+optional = []
+docs = [
+    "Sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-rtd-theme",
+    "sphinx-rtd-size",
+    "autodocsumm",
+    "sphinx-pyproject",
+]
+[tool.dapperdata]
+exclude_paths = [".venv", ".mypy_cache", ".git", ".vscode"]
+
+[tool.pylint.format]
+max-line-length = 200
+
+[tool.pylint.main]
+extension-pkg-allow-list = ["pyodbc", "win32gui"]
+load-plugins = "perflint"
+
+[tool.pylint."messages control"]
+disable = [
+    "W0707",
+    "W0703",
+    "C0204",
+    "C0411",
+    "C0114",
+    "C0115",
+    "C0116",
+    "W0611",
+    "E0401",
+    "W2301",
+    "C0414",
+    "C0413",
+    "R0902",
+    "R0914",
+    "W8205",
+    "E0611",
+    "C0103",
+    "R0913",
+    "R0903",
+    "W0613",
+    "C0412",
+    "W8201",
+    "R0912",
+    "R0915",
+    "R0801",
+    "W8402",
+    "W0511",
+    "W0622",
+    "W0107",
+    "R0911",
+    "E1101",
+    "E1136",
+    "E1120",
+    "W8403",
+    "W0222",
+    "E1129",
+    "E0213",
+    "W0221",
+    "E1128",
+    "C0321",
+    "logging-fstring-interpolation",
+    "unnecessary-lambda-assignment",
+    "protected-access",
+    # codes in ruff
+    "C0105",
+    "C0131",
+    "C0132",
+    "C0205",
+    "C0208",
+    "C0414",
+    "C3002",
+    "E0100",
+    "E0101",
+    "E0116",
+    "E0117",
+    "E0118",
+    "E0237",
+    "E0241",
+    "E0302",
+    "E0307",
+    "E0604",
+    "E0605",
+    "E1142",
+    "E1205",
+    "E1206",
+    "E1300",
+    "E1307",
+    "E1310",
+    "E1507",
+    "E1700",
+    "E2502",
+    "E2510",
+    "E2512",
+    "E2513",
+    "E2514",
+    "E2515",
+    "R0124",
+    "R0133",
+    "R0206",
+    "R0402",
+    "R0911",
+    "R0912",
+    "R0913",
+    "R0915",
+    "R1701",
+    "R1711",
+    "R1714",
+    "R1722",
+    # "R2004",
+    # "R5501",
+    "W0120",
+    "W0127",
+    "W0129",
+    "W0131",
+    "W0406",
+    "W0602",
+    "W0603",
+    "W0711",
+    "W1508",
+    "W1509",
+    "W1510",
+    # "W2901",
+    "W3301",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff]
+exclude = [".venv"]
+line-length = 88
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = true
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint]
+typing-modules = ["beartype.typing"]
+select = ["ALL"]
+ignore = [
+    "B024",
+    "PIE790",
+    "T201",
+    "PYI013",
+    "ANN101",
+    "TCH003",
+    "PLC0414",
+    "ERA001",
+    "T203",
+    "ANN102",
+    "ANN401",
+    "TCH002",
+    "TD002",
+    "TD003",
+    "FIX002",
+    "D203",
+    "D213",
+    "COM812",
+    "ISC001",
+    "FBT001",
+    "FBT002",
+]
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.setuptools.dynamic]
+readme = { file = ["README.md"] }
+
+[tool.setuptools.package-data]
+library = ["py.typed"]
+
+[tool.setuptools.packages.find]
+exclude = ["docs*", "tests*"]
+where = ["src"]
+
+[tool.sphinx-pyproject]
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+coverage_show_missing_items = true
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.coverage",
+    "autodocsumm",
+    "sphinx_rtd_theme",
+    'sphinx_rtd_size',
+]
+sphinx_rtd_size_width = "90%"
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+auto_doc_default_options = { 'autosummary' = true }
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+html_theme = "sphinx_rtd_theme"
+html_style = "css/custom.css"
+html_static_path = ["_static"]
+html_theme_options = { 'display_version' = true, 'sticky_navigation' = true, 'includehidden' = true, 'titles_only' = false }
+autosummary_generate = true
+
+[tool.sphinx-pyproject.autodoc_default_options]
+exclude-members = """
+  __weakref__,
+  __sizeof__,
+  __hash__,
+  __module__,
+  __dict__,
+  __annotations__,
+  __orig_bases__,
+  __parameters__,
+  __abstractmethods__,
+  __non_callable_proto_members__,
+  __protocol_attrs__,
+  __subclasshook__,
+  __dataclass_fields__,
+  __post_init__,
+  __dataclass_params__,
+  __match_args__,
+  __str__,
+  __repr__"""
+members = true
+member-order = 'bysource'
+special-members = true
+undoc-members = true
 
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py37, py38, py39, py310, py311
-isolated_build = true
+skipsdist = True
+isolated_build = True
+envlist = py310, py311, py312
 
-[gh-actions]
-python =
-    3.7: py37
-    3.8: py38
-    3.9: py39
-    3.10: py310
 [testenv]
-setenv =
-   PYTHONPATH = {toxinidir}
-deps = -r{toxinidir}/requirements_test.txt
-commands = python -m unittest discover -v
+deps =
+    -rrequirements-dev.txt
+    -rrequirements-optional.txt
+
+commands =
+    pytest tests
 """
-
-[tool.isort]
-profile = "black"
-sections = ["FUTURE","STDLIB","THIRDPARTY","FIRSTPARTY","LOCALFOLDER"]
-
-[tool.mypy]
-plugins = "pydantic.mypy"
-follow_imports = "silent"
-warn_redundant_casts = true
-warn_unused_ignores = false
-disallow_any_generics = true
-check_untyped_defs = true
-no_implicit_reexport = true
-disallow_untyped_defs = true

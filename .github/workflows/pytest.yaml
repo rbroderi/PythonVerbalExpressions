@@ -1,0 +1,27 @@
+name: PyTest
+
+"on":
+  push:
+  pull_request:
+
+env:
+  COLUMNS: 120
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: 'pip'
+
+      - uses: taiki-e/install-action@just
+
+      - name: Install Dependencies
+        run: just install
+
+      - name: Run Tests
+        run: just pytest

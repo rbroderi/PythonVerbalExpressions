@@ -1,39 +1,37 @@
 """Generate regular expressions from an easier fluent verbal form."""
+
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
+from collections.abc import Iterator
 from enum import Enum
 from functools import wraps
+from typing import Annotated
+from typing import Any
+from typing import TypeAlias
+from typing import Union
+from typing import cast
+from typing import runtime_checkable
 
 try:
-    from typing import (  # <--------------- if Python ≥ 3.9.0
-        Annotated,
-        ParamSpec,
-        Protocol,
-        TypeAlias,
-        runtime_checkable,
-    )
+    from typing import Self
 except ImportError:
-    from typing_extensions import TypeAlias, Protocol, Annotated, ParamSpec, runtime_checkable  # type: ignore # <--- if Python < 3.9.0 # noqa E501
+    from typing_extensions import Self
 
-from typing import TYPE_CHECKING, Pattern, TypeVar
+try:
+    from typing import ParamSpec
+    from typing import Protocol
 
-if TYPE_CHECKING:
-    from typing import Protocol  # noqa: F811
+except ImportError:
+    from typing_extensions import ParamSpec
+    from typing_extensions import Protocol
 
-from beartype import beartype  # type: ignore
-from beartype.typing import (  # type: ignore
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
-from beartype.vale import Is  # type: ignore
+from re import Pattern
+from typing import TypeVar
+
+from beartype import beartype
+from beartype.vale import Is
 
 
 def _string_len_is_1(text: object) -> bool:
@@ -43,8 +41,8 @@ def _string_len_is_1(text: object) -> bool:
 Char = Annotated[str, Is[_string_len_is_1]]
 
 
-P = ParamSpec("P")  # noqa: VNE001
-R = TypeVar("R")  # noqa: VNE001
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 # work around for bug https://github.com/python/mypy/issues/12660
@@ -56,8 +54,10 @@ class HasIter(Protocol):
     def __iter__(self) -> Iterator[Any]:
         """Object can be iterated.
 
-        Yields:
+        Yields
+        ------
             Next object.
+
         """
         ...
 
@@ -68,11 +68,11 @@ class HasIter(Protocol):
 class HasItems(Protocol):
     """Workaround for mypy P.kwargs."""
 
-    def items(self) -> Tuple[str, Any]:
+    def items(self) -> tuple[str, Any]:
         """Object has items method.
 
-        Returns:
-            The dict of items.
+        :returns: The dict of items.
+        :rtype: dict
         """
         ...
 
@@ -80,18 +80,21 @@ class HasItems(Protocol):
 class EscapedText(str):
     """Text that has been escaped for regex.
 
-    Arguments:
-        str -- Extend the string class.
+    :param str value: the string to escape
+    :return: escaped regex string
+    :rtype: str
+
     """
 
-    def __new__(cls, value: str) -> EscapedText:
-        """Return a escaped regex string.
+    __slots__ = ()
 
-        Arguments:
-            value -- the string to escape
+    def __new__(cls, value: str) -> Self:
+        """Return an escaped regex string.
 
-        Returns:
-            _description_
+        :param str value: the string to escape
+        :return: escaped regex string
+        :rtype: str
+
         """
         return str.__new__(cls, re.escape(value))
 
@@ -99,17 +102,17 @@ class EscapedText(str):
 def re_escape(func: Callable[P, R]) -> Callable[P, R]:
     """Automatically escape any string parameters as EscapedText.
 
-    Arguments:
-        func -- The function to decorate.
+    :param func: The function to decorate.
+    :type func: Callable[P, R]
+    :return: The decorated function.
+    :rtype: Callable[P, R]
 
-    Returns:
-        The decorated function.
     """
 
     @wraps(func)
-    def inner(*args: P.args, **kwargs: P.kwargs) -> R:  # type: ignore
-        escaped_args: List[Any] = []
-        escaped_kwargs: Dict[str, Any] = {}
+    def inner(*args: P.args, **kwargs: P.kwargs) -> R:
+        escaped_args: list[Any] = []
+        escaped_kwargs: dict[str, Any] = {}
         for arg in cast(HasIter, args):
             if not isinstance(arg, EscapedText) and isinstance(arg, str):
                 escaped_args.append(EscapedText(arg))
@@ -122,7 +125,7 @@ def re_escape(func: Callable[P, R]) -> Callable[P, R]:
                 escaped_kwargs[arg_k] = EscapedText(str(arg_v))
             else:
                 escaped_kwargs[arg_k] = arg_v
-        return func(*escaped_args, **escaped_kwargs)  # type: ignore
+        return func(*escaped_args, **escaped_kwargs)  # pyright: ignore[reportCallIssue]
 
     return inner
 
@@ -130,8 +133,9 @@ def re_escape(func: Callable[P, R]) -> Callable[P, R]:
 class CharClass(Enum):
     """Enum of character classes in regex.
 
-    Arguments:
-        Enum -- Extends the Enum class.
+    :param Enum: Extends the Enum class.
+    :type Enum: class
+
     """
 
     DIGIT = "\\d"
@@ -144,17 +148,19 @@ class CharClass(Enum):
     def __str__(self) -> str:
         """To string method based on Enum value.
 
-        Returns:
-            value of Enum
+        :return: value of Enum
+        :rtype: str
+
         """
         return self.value
 
 
 class SpecialChar(Enum):
-    """Enum of special charaters, shorthand.
+    """Enum of special characters, shorthand.
 
-    Arguments:
-        Enum -- Extends the Enum class.
+    :param Enum: Extends the Enum class.
+    :type Enum: class
+
     """
 
     # does not work  / should not be used in [ ]
@@ -166,77 +172,74 @@ class SpecialChar(Enum):
     def __str__(self) -> str:
         """To string for special chars enum.
 
-        Returns:
-            Return value of enum as string.
+        :return: Return value of enum as string.
+        :rtype: str
+
         """
         return self.value
 
 
-CharClassOrChars: TypeAlias = Union[str, CharClass]
-EscapedCharClassOrSpecial: TypeAlias = Union[str, CharClass, SpecialChar]
+CharClassOrChars: TypeAlias = str | CharClass
+EscapedCharClassOrSpecial: TypeAlias = str | CharClass | SpecialChar
 VerbexEscapedCharClassOrSpecial: TypeAlias = Union["Verbex", EscapedCharClassOrSpecial]
 
 
-def _poseur_decorator(*poseur: Any) -> Any:
-    """Positional-only arguments runtime checker."""
-    import functools
-
-    def caller(func: Callable[P, R]) -> Callable[P, R]:  # type: ignore
-        @functools.wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-            poseur_args = set(poseur).intersection(kwargs)  # type: ignore
-            if poseur_args:
-                raise TypeError(
-                    "%s() got some positional-only arguments passed as keyword"
-                    " arguments: %r" % (func.__name__, ", ".join(poseur_args)),
-                )
-            return func(*args, **kwargs)  # type: ignore
-
-        return wrapper
-
-    return caller
-
-
 class Verbex:
-    """
-    VerbalExpressions class.
+    """VerbalExpressions class.
 
-    the following methods do not try to match the original js lib!
+    The following methods do not try to match the original js lib!
+
+    .. note::
+        This class is a modified version of the VerbalExpressions library.
+
     """
 
     EMPTY_REGEX_FLAG = re.RegexFlag(0)
 
     @re_escape
     @beartype
-    def __init__(self, modifiers: re.RegexFlag = EMPTY_REGEX_FLAG):
+    def __init__(self, modifiers: re.RegexFlag = EMPTY_REGEX_FLAG) -> None:
         """Create a Verbex object; setting any needed flags.
 
-        Keyword Arguments:
-            modifiers -- Regex modifying flags (default: {re.RegexFlag(0)})
+        :param modifiers: Regex modifying flags (default: ``re.RegexFlag(0)``)
+        :type modifiers: re.RegexFlag
+
+        :returns: The created Verbex object.
+        :rtype: Verbex
+
         """
         # self._parts: List[str] = [text]
-        self._parts: List[str] = []
+        self._parts: list[str] = []
         self._modifiers = modifiers
 
     @property
     def modifiers(self) -> re.RegexFlag:
         """Return the modifiers for this Verbex object.
 
-        Returns:
-            The modifiers applied to this object.
+        :return: The modifiers applied to this object.
+        :rtype: re.RegexFlag
+
         """
         return self._modifiers
 
     def __str__(self) -> str:
-        """Return regex string representation."""
+        """Return regex string representation.
+
+        :return: The regex string representation.
+        :rtype: str
+
+        """
         return "".join(self._parts)
 
     @beartype
-    def _add(self, value: Union[str, List[str]]) -> Verbex:
-        """
-        Append a transformed value to internal expression to be compiled.
+    def _add(self, value: str | list[str]) -> Verbex:
+        """Append a transformed value to internal expression to be compiled.
 
         As possible, this method should be "private".
+
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         if isinstance(value, list):
             self._parts.extend(value)
@@ -245,7 +248,12 @@ class Verbex:
         return self
 
     def regex(self) -> Pattern[str]:
-        """Get a regular expression object."""
+        """Get a regular expression object.
+
+        :return: A regular expression object.
+        :rtype: Pattern[str]
+
+        """
         return re.compile(
             str(self),
             self._modifiers,
@@ -260,7 +268,7 @@ class Verbex:
         name: str,
         text: VerbexEscapedCharClassOrSpecial,
     ) -> Verbex:
-        return self._add(f"(?<{name}>{str(text)})")
+        return self._add(f"(?<{name}>{text!s})")
 
     @re_escape
     @beartype
@@ -268,29 +276,29 @@ class Verbex:
         self,
         text: VerbexEscapedCharClassOrSpecial,
     ) -> Verbex:
-        return self._add(f"({str(text)})")
+        return self._add(f"({text!s})")
 
     @re_escape
     @beartype
-    @_poseur_decorator("self")
     def capture_group(
         self,
-        name_or_text: Union[Optional[str], VerbexEscapedCharClassOrSpecial] = None,
-        text: Optional[VerbexEscapedCharClassOrSpecial] = None,
+        name_or_text: str | None | VerbexEscapedCharClassOrSpecial = None,
+        text: VerbexEscapedCharClassOrSpecial | None = None,
     ) -> Verbex:
         """Create a capture group.
 
-        Name is optional if not specified then the first argument is the text.
+        Name is optional. If not specified, then the first argument is the text.
 
-        Keyword Arguments:
-            name_or_text -- The name of the group / text to search for (default: {None})
-            text -- The text to search for (default: {None})
+        :param name_or_text: The name of the group / text to search for (default: None)
+        :type name_or_text: str or None
+        :param text: The text to search for (default: None)
+        :type text: str or None
 
-        Raises:
-            ValueError: If name is specified then text must be as well.
+        :raises ValueError: If name is specified, then text must be as well.
 
-        Returns:
-            Verbex with added capture group.
+        :returns: Verbex with added capture group.
+        :rtype: Verbex
+
         """
         if name_or_text is not None:
             if text is None:
@@ -298,18 +306,20 @@ class Verbex:
                 return self._capture_group_without_name(_text)
             if isinstance(name_or_text, str):
                 return self._capture_group_with_name(name_or_text, text)
-        raise ValueError("text must be specified with optional name")
+        msg = "text must be specified with optional name"
+        raise ValueError(msg)
 
     @re_escape
     @beartype
     def OR(self, text: VerbexEscapedCharClassOrSpecial) -> Verbex:  # noqa: N802
         """`or` is a python keyword so we use `OR` instead.
 
-        Arguments:
-            text -- Text to find or a Verbex object.
+        :param text: Text to find or a Verbex object.
+        :type text: VerbexEscapedCharClassOrSpecial
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add("|").find(text)
 
@@ -318,102 +328,110 @@ class Verbex:
     def zero_or_more(self, text: VerbexEscapedCharClassOrSpecial) -> Verbex:
         """Find the text or Verbex object zero or more times.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
-        return self._add(f"(?:{str(text)})*")
+        return self._add(f"(?:{text!s})*")
 
     @re_escape
     @beartype
     def one_or_more(self, text: VerbexEscapedCharClassOrSpecial) -> Verbex:
         """Find the text or Verbex object one or more times.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
-        return self._add(f"(?:{str(text)})+")
+        return self._add(f"(?:{text!s})+")
 
     @re_escape
     @beartype
     def n_times(
         self,
         text: VerbexEscapedCharClassOrSpecial,
-        n: int,  # noqa: VNE001
+        n: int,
     ) -> Verbex:
         """Find the text or Verbex object n or more times.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
+        :return: Modified Verbex object.
+        :rtype: Verbex
 
-        Returns:
-            Modified Verbex object.
         """
-        return self._add(f"(?:{str(text)}){{{n}}}")
+        return self._add(f"(?:{text!s}){{{n}}}")
 
     @re_escape
     @beartype
     def n_times_or_more(
         self,
         text: VerbexEscapedCharClassOrSpecial,
-        n: int,  # noqa: VNE001
+        n: int,
     ) -> Verbex:
         """Find the text or Verbex object at least n times.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
+        :return: Modified Verbex object.
+        :rtype: Verbex
 
-        Returns:
-            Modified Verbex object.
         """
-        return self._add(f"(?:{str(text)}){{{n},}}")
+        return self._add(f"(?:{text!s}){{{n},}}")
 
     @re_escape
     @beartype
     def n_to_m_times(
         self,
         text: VerbexEscapedCharClassOrSpecial,
-        n: int,  # noqa: VNE001
-        m: int,  # noqa: VNE001
+        n: int,
+        m: int,
     ) -> Verbex:
         """Find the text or Verbex object between n and m times.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
+        :param n: The minimum number of times to find the text.
+        :type n: int
+        :param m: The maximum number of times to find the text.
+        :type m: int
+        :return: Modified Verbex object.
+        :rtype: Verbex
 
-        Returns:
-            Modified Verbex object.
         """
-        return self._add(f"(?:{str(text)}){{{n},{m}}}")
+        return self._add(f"(?:{text!s}){{{n},{m}}}")
 
     @re_escape
     @beartype
     def maybe(self, text: VerbexEscapedCharClassOrSpecial) -> Verbex:
         """Possibly find the text / Verbex object.
 
-        Arguments:
-            text -- The text / Verbex object to possibly find.
+        :param text: The text / Verbex object to possibly find.
+        :type text: VerbexEscapedCharClassOrSpecial
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
-        return self._add(f"(?:{str(text)})?")
+        return self._add(f"(?:{text!s})?")
 
     @re_escape
     @beartype
     def find(self, text: VerbexEscapedCharClassOrSpecial) -> Verbex:
         """Find the text or Verbex object.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(str(text))
 
@@ -422,11 +440,12 @@ class Verbex:
     def then(self, text: VerbexEscapedCharClassOrSpecial) -> Verbex:
         """Synonym for find.
 
-        Arguments:
-            text -- The text / Verbex object to look for.
+        :param text: The text / Verbex object to look for.
+        :type text: VerbexEscapedCharClassOrSpecial
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self.find(text)
 
@@ -437,8 +456,9 @@ class Verbex:
 
         Positive lookahead
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"(?={text})")
 
@@ -449,8 +469,9 @@ class Verbex:
 
         Negative lookahead
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"(?!{text})")
 
@@ -461,8 +482,9 @@ class Verbex:
 
         Positive lookbehind
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"(?<={text})")
 
@@ -473,23 +495,23 @@ class Verbex:
 
         Negative Lookbehind
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"(?<!{text})")
-
-    # only allow CharclassOrChars
 
     @re_escape
     @beartype
     def any_of(self, chargroup: CharClassOrChars) -> Verbex:
         """Find anything in this group of chars or char class.
 
-        Arguments:
-            text -- The characters to look for.
+        :param text: The characters to look for.
+        :type text: str
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"(?:[{chargroup}])")
 
@@ -498,11 +520,12 @@ class Verbex:
     def not_any_of(self, text: CharClassOrChars) -> Verbex:
         """Find anything but this group of chars or char class.
 
-        Arguments:
-            text -- The characters to not look for.
+        :param text: The characters to not look for.
+        :type text: str
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"(?:[^{text}])")
 
@@ -510,11 +533,12 @@ class Verbex:
     def anything_but(self, chargroup: EscapedCharClassOrSpecial) -> Verbex:
         """Find anything one or more times but this group of chars or char class.
 
-        Arguments:
-            text -- The characters to not look for.
+        :param text: The characters to not look for.
+        :type text: str
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(f"[^{chargroup}]+")
 
@@ -523,48 +547,54 @@ class Verbex:
     def start_of_line(self) -> Verbex:
         """Find the start of the line.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self.find(SpecialChar.START_OF_LINE)
 
     def end_of_line(self) -> Verbex:
         """Find the end of the line.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self.find(SpecialChar.END_OF_LINE)
 
     def line_break(self) -> Verbex:
         """Find a line break.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self.find(SpecialChar.LINEBREAK)
 
     def tab(self) -> Verbex:
         """Find a tab.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self.find(SpecialChar.TAB)
 
     def anything(self) -> Verbex:
-        """Find anything one or more time.
+        """Find anything one or more times.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add(".+")
 
     def as_few(self) -> Verbex:
         """Modify previous search to not be greedy.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add("?")
 
@@ -572,12 +602,13 @@ class Verbex:
     def number_range(self, start: int, end: int) -> Verbex:
         """Generate a range of numbers.
 
-        Arguments:
-            start -- Start of the range
-            end -- End of the range
+        :param start: Start of the range
+        :type start: int
+        :param end: End of the range
+        :type end: int
+        :return: Modified Verbex object.
+        :rtype: Verbex
 
-        Returns:
-            Modified Verbex object.
         """
         return self._add("(?:" + "|".join(str(i) for i in range(start, end + 1)) + ")")
 
@@ -585,20 +616,22 @@ class Verbex:
     def letter_range(self, start: Char, end: Char) -> Verbex:
         """Generate a range of letters.
 
-        Arguments:
-            start -- Start of the range
-            end -- End of the range
+        :param start: Start of the range
+        :type start: Char
+        :param end: End of the range
+        :type end: Char
+        :return: Modified Verbex object.
+        :rtype: Verbex
 
-        Returns:
-            Modified Verbex object.
         """
         return self._add(f"[{start}-{end}]")
 
     def word(self) -> Verbex:
         """Find a word on word boundary.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         return self._add("(\\b\\w+\\b)")
 
@@ -607,17 +640,19 @@ class Verbex:
     def with_any_case(self) -> Verbex:
         """Modify Verbex object to be case insensitive.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         self._modifiers |= re.IGNORECASE
         return self
 
     def search_by_line(self) -> Verbex:
-        """Search each line, ^ and $ match begining and end of line respectively.
+        """Search each line, ^ and $ match beginning and end of line respectively.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         self._modifiers |= re.MULTILINE
         return self
@@ -625,8 +660,9 @@ class Verbex:
     def with_ascii(self) -> Verbex:
         """Match ascii instead of unicode.
 
-        Returns:
-            Modified Verbex object.
+        :return: Modified Verbex object.
+        :rtype: Verbex
+
         """
         self._modifiers |= re.ASCII
         return self
