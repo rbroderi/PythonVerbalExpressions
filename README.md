@@ -5,7 +5,7 @@ Verbex: Python verbal based regular expressions
 <!-- [![GitHub License](https://img.shields.io/github/license/rbroderi/Verbex)](https://github.com/rbroderi/Verbex/blob/master/LICENSE) -->
 [![Generic badge](https://img.shields.io/badge/license-GPL‐3.0-orange.svg)](https://github.com/rbroderi/Verbex/blob/master/LICENSE)
 [![Code style: black](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![PyPI pyversions](https://img.shields.io/pypi/pyversions/verbex)](https://pypi.python.org/pypi/ansicolortags/)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/verbex)](https://pypi.python.org/pypi/Verbex/)
 [![Generic badge](https://img.shields.io/badge/mypy-typed-purple.svg)](http://mypy-lang.org/)
 [![Generic badge](https://img.shields.io/badge/beartype-runtime_typed-cyan.svg)](https://github.com/beartype/beartype)
 [![Generic badge](https://img.shields.io/badge/bandit-checked-magenta.svg)](https://bandit.readthedocs.io/en/latest/)
