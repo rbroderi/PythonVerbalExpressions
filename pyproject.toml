@@ -5,12 +5,19 @@ requires = ["setuptools>=67.0", "wheel"]
 [project]
 authors = [{"name" = "R.Broderick"}]
 description = "Python verbal based regular expressions"
-version = "2.0.1"
+version = "2.0.2"
 license = {"file" = "LICENSE"}
-name = "verbex"
+name = "Verbex"
 readme = {file = "README.md", content-type = "text/markdown"}
 dependencies = ["beartype", "typing-extensions; python_version < '3.12'"]
 requires-python = ">=3.10.0"
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
+]
 
 [project.optional-dependencies]
 dev = [
@@ -45,6 +52,10 @@ docs = [
   "autodocsumm",
   "sphinx-pyproject"
 ]
+
+[project.urls]
+homepage = "https://github.com/rbroderi/Verbex"
+documentation = "https://rbroderi.github.io/Verbex/"
 
 [tool.dapperdata]
 exclude_paths = [".venv", ".mypy_cache", ".git", ".vscode"]
